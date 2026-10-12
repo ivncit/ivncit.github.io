@@ -295,15 +295,33 @@ const clean = n => n.replace(/\.[a-z0-9]+$/i,"").replace(/[_-]+/g," ").trim();
 const normalizeFolderName = n => n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N}]+/gu," ").trim().toLocaleUpperCase("pt-BR");
 const SHOWCASE_FOLDERS = new Set(["SELECOES", "RETRO", "VERSAO JOGADOR", "KIT DE TREINO", "CORTA VENTOS"]);
 
+async function mapLimit(items, limit, fn){
+  const results = Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{
+    while(next < items.length){ const i = next++; results[i] = await fn(items[i]); }
+  }));
+  return results;
+}
+
 async function loadDriveSlides(){
   const items = [];
   const top = await driveList(DRIVE_FOLDER_ID);
-  for(const folder of top.filter(f=>f.mimeType==="application/vnd.google-apps.folder" && SHOWCASE_FOLDERS.has(normalizeFolderName(f.name)))){
-    const files = await driveList(folder.id);
-    files.filter(f=>f.mimeType.startsWith("image/")).forEach(f=>{
-      const title = clean(f.name);
-      items.push({id:f.id, title:/^[a-f0-9]{24,}(?:\s*\(\d+\))?$/i.test(title) ? "" : title, sub:folder.name});
+  let folders = top.filter(f=>f.mimeType==="application/vnd.google-apps.folder" && SHOWCASE_FOLDERS.has(normalizeFolderName(f.name)))
+    .map(f=>({id:f.id, category:f.name}));
+  for(let depth=0; folders.length && depth<5; depth++){
+    const batches = await mapLimit(folders,6,async folder=>{
+      const entries = await driveList(folder.id);
+      const images = entries.filter(f=>f.mimeType.startsWith("image/")).map(f=>{
+        const title = clean(f.name);
+        return {id:f.id, title:/^[a-f0-9]{24,}(?:\s*\(\d+\))?$/i.test(title) ? "" : title, sub:folder.category};
+      });
+      const subfolders = entries.filter(f=>f.mimeType==="application/vnd.google-apps.folder")
+        .map(f=>({id:f.id, category:folder.category}));
+      return {images, subfolders};
     });
+    batches.forEach(batch=>items.push(...batch.images));
+    folders = batches.flatMap(batch=>batch.subfolders);
   }
   return items.map(i=>({src:`https://drive.google.com/thumbnail?id=${i.id}&sz=w1000`, title:i.title, sub:i.sub}));
 }
