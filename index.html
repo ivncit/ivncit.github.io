@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invincit | Camisas de Futebol e Esportivas</title>
+<meta name="description" content="Camisas de futebol, retrô, NBA, F1, treino e mais. Veja preços e tabela de medidas.">
+<link rel="icon" href="assets/logo.png">
+<style>
+  :root{
+    --bg:#0a0a0a; --card:#141414; --line:#2a2a2a; --text:#f2f2f2; --muted:#9a9a9a; --accent:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(10,10,10,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.12em;font-size:1.1rem}
+  .brand img{height:44px;width:auto}
+  nav a{margin-left:18px;color:var(--muted);font-size:.9rem}
+  nav a:hover{color:var(--text)}
+  @media(max-width:640px){nav .hide-sm{display:none}}
+
+  .hero{padding:64px 0 48px;text-align:center;background:radial-gradient(ellipse at top,#1d1d1d 0%,var(--bg) 70%)}
+  .hero img{height:150px;margin-bottom:16px}
+  .hero h1{font-size:clamp(2rem,6vw,3.6rem);letter-spacing:.04em;text-transform:uppercase;font-weight:900}
+  .hero p{color:var(--muted);max-width:560px;margin:12px auto 24px}
+  .btn{display:inline-block;background:var(--accent);color:#000;font-weight:700;padding:12px 24px;border-radius:8px;border:0;cursor:pointer;font-size:.95rem}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn:hover{opacity:.88}
+
+  section{padding:48px 0}
+  h2{font-size:1.6rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  .sub{color:var(--muted);margin-bottom:24px}
+
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .chip{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:.85rem}
+  .chip.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .thumb{aspect-ratio:1/1;background:#1b1b1b;display:flex;align-items:center;justify-content:center;font-size:3.4rem;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .info{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .info h3{font-size:1rem}
+  .info small{color:var(--muted)}
+  .price{font-size:1.3rem;font-weight:800;margin-top:auto}
+  .card .btn{margin:0 14px 14px;text-align:center;padding:10px}
+
+  .extras{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+  .box h3{margin-bottom:10px}
+  .box ul{list-style:none}
+  .box li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .box li:last-child{border:0}
+  .box li b{white-space:nowrap}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;min-width:520px;text-align:center;font-size:.92rem}
+  th,td{padding:10px 12px;border:1px solid var(--line)}
+  thead th{background:#000;font-size:1rem}
+  tbody th{background:#111;text-align:left;font-weight:600;color:var(--muted);font-size:.8rem;text-transform:uppercase}
+  .note{color:var(--muted);font-size:.85rem;margin-top:12px}
+  .tab-panel{display:none}.tab-panel.on{display:block}
+
+  footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;color:var(--muted);font-size:.85rem}
+  footer img{height:56px;margin-bottom:10px}
+  .ig{width:1.15em;height:1.15em;vertical-align:-.2em;margin-right:6px;fill:currentColor}
+  .ig-btn{background:linear-gradient(45deg,#f09433,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888);color:#fff}
+  .fab{position:fixed;right:16px;bottom:16px;z-index:30;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);color:#fff;font-weight:800;padding:14px 20px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+
+  /* Vitrine (carrossel) */
+  .carousel{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#111;touch-action:pan-y;user-select:none;-webkit-user-select:none;max-width:560px;margin:0 auto}
+  .slides{display:flex;transition:transform .45s ease;will-change:transform}
+  .slides.drag{transition:none}
+  .slide{min-width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:#111}
+  .slide img{width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
+  .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 14px 14px;background:linear-gradient(transparent,rgba(0,0,0,.85));font-weight:700}
+  .cap small{display:block;color:var(--muted);font-weight:400}
+  .bar{position:absolute;left:0;top:0;height:3px;background:#fff;width:0}
+  .hint{text-align:center;color:var(--muted);font-size:.8rem;margin-top:10px}
+  .paused-tag{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);padding:4px 10px;border-radius:999px;font-size:.75rem;display:none}
+  .carousel.paused .paused-tag{display:block}
+  .carousel-msg{text-align:center;color:var(--muted);padding:40px 16px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top"><img src="assets/logo.png" alt="Logo Invincit" onerror="this.style.display='none'"> INVINCIT</a>
+    <nav>
+      <a href="#extras">Personalização</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <img src="assets/logo.png" alt="" onerror="this.style.display='none'">
+      <h1>Vista o seu time</h1>
+      <p>Camisas de futebol, retrô, NBA, F1, treino e muito mais.</p>
+      <a class="btn" href="https://drive.google.com/drive/folders/1YlDmHTEKZQgjZZuM8uU65EiwJ-fTA4Rt" target="_blank" rel="noopener">Ver catálogo</a>
+      <a class="btn ghost" href="#medidas">Tabela de medidas</a>
+    </div>
+  </div>
+
+  <section id="vitrine">
+    <div class="wrap">
+      <h2>Vitrine</h2>
+      <p class="sub">Passa sozinho a cada 3 segundos. Segure para pausar, arraste para a esquerda para avançar e para a direita para voltar.</p>
+      <div class="carousel" id="carousel">
+        <div class="bar" id="bar"></div>
+        <div class="slides" id="slides"></div>
+        <div class="paused-tag">⏸ pausado</div>
+      </div>
+      <p class="hint" id="hint"></p>
+    </div>
+  </section>
+
+  <section id="extras">
+    <div class="wrap">
+      <h2>Personalização e extras</h2>
+      <p class="sub">Deixe a peça com a sua cara.</p>
+      <div class="extras">
+        <div class="box">
+          <h3>📝 Personalização</h3>
+          <ul>
+            <li><span>Nome e número</span><b>R$ 100,00</b></li>
+            <li><span>Frases e textos</span><b>R$ 70,00</b></li>
+            <li><span>Todos os patrocínios</span><b>R$ 70,00</b></li>
+            <li><span>Patches (cada)</span><b>R$ 20,00</b></li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>🔥 Compressão térmica (atacado)</h3>
+          <ul>
+            <li><span>Regatas</span><b>R$ 145,00</b></li>
+            <li><span>Camisetas</span><b>R$ 140,00</b></li>
+            <li><span>Manga longa</span><b>R$ 170,00</b></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="medidas">
+    <div class="wrap">
+      <h2>Tabela de medidas</h2>
+      <p class="sub">Fique atento antes de escolher o tamanho.</p>
+      <div class="tabs" id="tabs"></div>
+      <div id="panels"></div>
+      <p class="note">As medidas são apenas referência. Devido a diferentes métodos de medição e à elasticidade do tecido, uma variação de 2–3 cm é normal.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="assets/logo.png" alt="" onerror="this.style.display='none'"><br>
+    © <span id="year"></span> Invincit. Todos os direitos reservados.
+  </div>
+</footer>
+
+<a data-ig class="fab" href="https://www.instagram.com/ivncit?xtok=bmNpaDJqOWUxZHQw" target="_blank" rel="noopener">Siga @Invincit</a>
+
+<script>
+/* ===================== CONFIGURAÇÕES (edite aqui) ===================== */
+const IG_DM = "https://ig.me/m/ivncit";
+
+/* Vitrine puxando do Google Drive.
+   1) A pasta precisa estar como "Qualquer pessoa com o link: Leitor".
+   2) Crie uma chave de API grátis (instruções no README) e cole abaixo. */
+const DRIVE_FOLDER_ID = "1YlDmHTEKZQgjZZuM8uU65EiwJ-fTA4Rt";
+const DRIVE_API_KEY = "AIzaSyDyre0O7iEmej2W80CsT1G9dssgJeizu2s"; // <- cole sua chave aqui
+const SLIDE_MS = 3000;
+
+/* Para cada produto, coloque a foto em img/ e preencha "img" (ex.: "img/torcedor.jpg").
+   Sem foto, aparece um emoji no lugar. */
+const PRODUCTS = [
+  {cat:"Futebol", name:"Versão Torcedor", price:140, emoji:"👕", img:""},
+  {cat:"Futebol", name:"Versão Jogador", price:170, emoji:"👕", img:""},
+  {cat:"Futebol", name:"Camisas Retrô", price:170, emoji:"👕", img:""},
+  {cat:"Futebol", name:"Torcedor Manga Longa", price:200, emoji:"🧥", img:""},
+  {cat:"Futebol", name:"Retrô Manga Longa", price:190, emoji:"🧥", img:""},
+  {cat:"Futebol", name:"Jogador Manga Longa", price:185, emoji:"🧥", img:""},
+  {cat:"Futebol", name:"Shorts de Futebol", price:150, emoji:"🩳", img:""},
+  {cat:"Futebol", name:"Meias Antiderrapantes", price:70, emoji:"🧦", unit:"cada", img:""},
+  {cat:"Infantil", name:"Kit Infantil", price:160, emoji:"👦", img:""},
+  {cat:"Infantil", name:"Kit Infantil Retrô", price:170, emoji:"👦", img:""},
+  {cat:"Infantil", name:"Body", price:140, emoji:"👶", img:""},
+  {cat:"Treino", name:"Corta Vento", price:305, emoji:"🥶", img:""},
+  {cat:"Treino", name:"Conjunto de Treino", price:360, emoji:"🥅", img:""},
+  {cat:"Treino", name:"Academia – Camisa", price:140, emoji:"🏋️", img:""},
+  {cat:"Treino", name:"Academia – Short", price:145, emoji:"🏋️", img:""},
+  {cat:"NBA", name:"Regatas NBA", price:170, emoji:"🏀", img:""},
+  {cat:"NBA", name:"Shorts NBA", price:170, emoji:"🏀", img:""},
+  {cat:"NBA", name:"Casuais NBA", price:145, emoji:"🏀", unit:"cada", img:""},
+  {cat:"Outros esportes", name:"Futebol Americano", price:200, emoji:"🏈", img:""},
+  {cat:"Outros esportes", name:"Fórmula 1", price:190, emoji:"🏎️", img:""},
+];
+
+const SIZES = {
+  "Torcedor": {
+    head:["Tamanho (cm)","P","M","G","GG","2XL","3XL","4XL"],
+    rows:[
+      ["Comprimento","69-71","71-73","73-75","75-78","78-81","81-83","83-85"],
+      ["Largura","53-55","55-57","57-58","58-60","60-62","62-64","64-65"],
+      ["Sua altura","162-170","170-176","176-182","182-190","190-195","192-197","197-200"],
+      ["Seu peso (kg)","50-62","62-78","78-83","83-90","90-97","97-104","104-110"],
+    ]},
+  "Jogador (Player)": {
+    head:["Tamanho (cm)","P (S)","M (M)","G (L)","GG (XL)","2XL"],
+    rows:[
+      ["Comprimento","67-69","69-71","71-73","73-76","76-78"],
+      ["Largura","49-51","51-53","53-55","55-57","57-60"],
+      ["Altura","162-170","170-175","175-180","180-185","185-190"],
+      ["Peso (kg)","50-62","62-75","75-80","80-85","85-90"],
+    ]},
+  "Feminina": {
+    head:["Tamanho (cm)","P","M","G","GG"],
+    rows:[
+      ["Comprimento","61-63","63-66","66-69","69-71"],
+      ["Largura","40-41","41-44","44-47","47-50"],
+      ["Altura","150-160","160-165","165-170","170-175"],
+    ]},
+  "Infantil": {
+    head:["Tamanho (cm)","16","18","20","22","24","26","28"],
+    rows:[
+      ["Comprimento","44","47","50","53","56","59","62"],
+      ["Largura","35","37","39","41","43","45","47"],
+      ["Altura","95-105","105-115","115-125","125-135","135-145","145-155","155-165"],
+      ["Idade","3-4","4-5","5-6","6-7","8-9","10-11","12-13"],
+    ]},
+  "Short Jordan": {
+    head:["Tamanho","Cintura (cm)","Quadril (cm)","Comprimento (cm)","Peso (kg)"],
+    rows:[
+      ["S","72-76","92-96","48","50-60"],
+      ["M","76-80","96-100","50","60-70"],
+      ["L","80-84","100-104","52","70-80"],
+      ["XL","84-88","104-108","54","80-90"],
+      ["2XL","88-92","108-112","56","90-100"],
+      ["3XL","92-96","112-116","58","100-110"],
+      ["4XL","96-100","116-120","60","110-120"],
+    ]},
+};
+/* ====================================================================== */
+
+const brl = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+
+// Ícone do Instagram
+const IG_SVG = '<svg class="ig" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>';
+document.querySelectorAll("[data-ig]").forEach(el=>el.insertAdjacentHTML("afterbegin", IG_SVG));
+
+// Aviso rápido
+function toast(msg){
+  const t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = "position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#fff;color:#000;padding:10px 16px;border-radius:8px;z-index:50;font-weight:600;font-size:.9rem;max-width:90%;text-align:center";
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+
+// Tabelas de medidas
+const tabs = document.getElementById("tabs"), panels = document.getElementById("panels");
+Object.entries(SIZES).forEach(([name,t],i)=>{
+  const b = document.createElement("button");
+  b.className = "chip"+(i===0?" on":""); b.textContent = name;
+  const panel = document.createElement("div");
+  panel.className = "tab-panel"+(i===0?" on":"");
+  panel.innerHTML = `<div class="tbl-wrap"><table><thead><tr>${t.head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${
+    t.rows.map(r=>`<tr><th>${r[0]}</th>${r.slice(1).map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")
+  }</tbody></table></div>`;
+  b.onclick = ()=>{
+    [...tabs.children].forEach(x=>x.classList.toggle("on",x===b));
+    [...panels.children].forEach(x=>x.classList.toggle("on",x===panel));
+  };
+  tabs.appendChild(b); panels.appendChild(panel);
+});
+
+document.getElementById("year").textContent = new Date().getFullYear();
+
+// ===== Vitrine: imagens do Google Drive =====
+async function driveList(id){
+  const q = encodeURIComponent(`'${id}' in parents and trashed=false`);
+  const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,mimeType)&orderBy=name&pageSize=1000&key=${DRIVE_API_KEY}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("Drive " + r.status);
+  return (await r.json()).files || [];
+}
+const clean = n => n.replace(/\.[a-z0-9]+$/i,"").replace(/[_-]+/g," ").trim();
+
+async function loadDriveSlides(){
+  const items = [];
+  const top = await driveList(DRIVE_FOLDER_ID);
+  for(const f of top){
+    if(f.mimeType.startsWith("image/")) items.push({id:f.id, title:clean(f.name), sub:""});
+  }
+  for(const folder of top.filter(f=>f.mimeType==="application/vnd.google-apps.folder")){
+    const files = await driveList(folder.id);
+    files.filter(f=>f.mimeType.startsWith("image/")).forEach(f=>items.push({id:f.id, title:clean(f.name), sub:folder.name}));
+  }
+  return items.map(i=>({src:`https://drive.google.com/thumbnail?id=${i.id}&sz=w1000`, title:i.title, sub:i.sub}));
+}
+
+function startCarousel(slides){
+  const box = document.getElementById("carousel"), track = document.getElementById("slides"), bar = document.getElementById("bar");
+  track.innerHTML = slides.map(s=>`<div class="slide"><img src="${s.src}" alt="${s.title}" loading="lazy" referrerpolicy="no-referrer" draggable="false"><div class="cap">${s.title}${s.sub?`<small>${s.sub}</small>`:""}</div></div>`).join("");
+  document.getElementById("hint").textContent = "";
+  let i = 0, held = false, dragging = false, startX = 0, dx = 0, t0 = performance.now(), elapsed = 0;
+  const n = slides.length;
+  const go = k => { i = (k + n) % n; track.classList.remove("drag"); track.style.transform = `translateX(${-i*100}%)`; elapsed = 0; };
+  const setPaused = v => { held = v; box.classList.toggle("paused", v); };
+
+  function tick(now){
+    const dt = now - t0; t0 = now;
+    if(!held && !document.hidden){ elapsed += dt; if(elapsed >= SLIDE_MS) go(i+1); }
+    bar.style.width = held ? bar.style.width : (elapsed/SLIDE_MS*100) + "%";
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  box.addEventListener("pointerdown", e=>{ dragging = true; startX = e.clientX; dx = 0; setPaused(true); box.setPointerCapture(e.pointerId); });
+  box.addEventListener("pointermove", e=>{
+    if(!dragging) return;
+    dx = e.clientX - startX;
+    track.classList.add("drag");
+    track.style.transform = `translateX(calc(${-i*100}% + ${dx}px))`;
+  });
+  const end = ()=>{
+    if(!dragging) return;
+    dragging = false;
+    const th = Math.min(60, box.clientWidth * .15);
+    if(dx < -th) go(i+1);        // arrastou p/ esquerda → próxima
+    else if(dx > th) go(i-1);    // arrastou p/ direita → anterior
+    else go(i);
+    setPaused(false);
+  };
+  box.addEventListener("pointerup", end);
+  box.addEventListener("pointercancel", end);
+  box.addEventListener("contextmenu", e=>e.preventDefault());
+  go(0);
+}
+
+(async function initCarousel(){
+  const box = document.getElementById("carousel");
+  const msg = t => { box.innerHTML = `<div class="carousel-msg">${t}</div>`; };
+  if(!DRIVE_API_KEY){ msg("Vitrine ainda não conectada ao Google Drive (falta a chave de API)."); return; }
+  try{
+    const slides = await loadDriveSlides();
+    if(!slides.length){ msg("Nenhuma imagem encontrada na pasta do Drive."); return; }
+    startCarousel(slides);
+  }catch(e){
+    msg("Não foi possível carregar o Drive. Verifique se a pasta está pública e se a chave de API está correta.");
+  }
+})();
+</script>
+</body>
+</html>
