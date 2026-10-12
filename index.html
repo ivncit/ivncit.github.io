@@ -74,17 +74,25 @@
   .fab{position:fixed;right:16px;bottom:16px;z-index:30;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);color:#fff;font-weight:800;padding:14px 20px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
 
   /* Vitrine (carrossel) */
-  .carousel{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#111;touch-action:pan-y;user-select:none;-webkit-user-select:none;max-width:560px;margin:0 auto}
+  .carousel{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#111;touch-action:pan-y;user-select:none;-webkit-user-select:none;width:100%;max-width:none;margin:0 auto}
   .slides{display:flex;transition:transform .45s ease;will-change:transform}
   .slides.drag{transition:none}
-  .slide{min-width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:#111}
-  .slide img{width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
+  .slide{min-width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:#111}
+  .slide img{width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
   .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 14px 14px;background:linear-gradient(transparent,rgba(0,0,0,.85));font-weight:700;overflow:hidden;overflow-wrap:anywhere}
   .cap-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
   .cap small{display:block;color:var(--muted);font-weight:400}
   .bar{position:absolute;left:0;top:0;height:3px;background:#fff;width:0}
   .hint{text-align:center;color:var(--muted);font-size:.8rem;margin-top:10px}
   .carousel-msg{text-align:center;color:var(--muted);padding:40px 16px}
+  .image-viewer{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.97);opacity:0;visibility:hidden;pointer-events:none;touch-action:none}
+  .image-viewer.open{opacity:1;visibility:visible;pointer-events:auto}
+  .viewer-photo{width:100%;height:100%;max-width:100vw;max-height:100dvh;object-fit:contain;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;touch-action:none}
+  .image-viewer.open .viewer-photo{animation:viewer-pop .42s cubic-bezier(.18,.9,.24,1.25) both}
+  @keyframes viewer-pop{0%{transform:scale(.72);opacity:0}72%{transform:scale(1.04);opacity:1}100%{transform:scale(1);opacity:1}}
+  .viewer-close{position:absolute;top:max(14px,env(safe-area-inset-top));right:16px;z-index:2;width:46px;height:46px;border:1px solid rgba(255,255,255,.35);border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:30px;line-height:1;cursor:pointer}
+  .viewer-help{position:absolute;left:12px;right:12px;bottom:max(18px,env(safe-area-inset-bottom));z-index:2;text-align:center;color:#fff;font-size:.85rem;text-shadow:0 1px 5px #000;pointer-events:none}
+  @media(prefers-reduced-motion:reduce){.image-viewer.open .viewer-photo{animation:none}}
 </style>
 </head>
 <body>
@@ -351,14 +359,86 @@ function startCarousel(slides){
   }
   requestAnimationFrame(tick);
 
-  box.addEventListener("pointerdown", e=>{ dragging = true; startX = e.clientX; dx = 0; setPaused(true); box.setPointerCapture(e.pointerId); });
+  const viewer = document.createElement("div");
+  viewer.className = "image-viewer";
+  viewer.setAttribute("role","dialog"); viewer.setAttribute("aria-modal","true"); viewer.setAttribute("aria-label","Imagem do produto em tela cheia");
+  const viewerPhoto = document.createElement("img"); viewerPhoto.className = "viewer-photo"; viewerPhoto.alt = ""; viewerPhoto.draggable = false;
+  const viewerClose = document.createElement("button"); viewerClose.className = "viewer-close"; viewerClose.type = "button"; viewerClose.textContent = "×"; viewerClose.setAttribute("aria-label","Fechar imagem em tela cheia");
+  const viewerHelp = document.createElement("p"); viewerHelp.className = "viewer-help"; viewerHelp.textContent = "Belisque para ampliar · arraste para mover · × para fechar";
+  viewer.append(viewerPhoto,viewerClose,viewerHelp); document.body.appendChild(viewer);
+  let viewerOpen = false, previousOverflow = "", zoom = 1, panX = 0, panY = 0, pinchStartDistance = 0, pinchStartZoom = 1;
+  const viewerPointers = new Map();
+  const viewerPoints = () => [...viewerPointers.values()].slice(0,2);
+  const pointDistance = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
+  const applyViewerTransform = () => { viewerPhoto.style.transform = `translate3d(${panX}px,${panY}px,0) scale(${zoom})`; };
+  const openViewer = (slide,pointerId,x,y) => {
+    viewerPhoto.src = slide.src; viewerPhoto.alt = slide.title || slide.sub || "Produto";
+    zoom = 1; panX = 0; panY = 0; applyViewerTransform(); viewerPointers.clear();
+    viewerPointers.set(pointerId,{x,y}); pinchStartDistance = 0; pinchStartZoom = 1;
+    previousOverflow = document.body.style.overflow; document.body.style.overflow = "hidden";
+    viewer.classList.add("open"); viewerOpen = true;
+  };
+  const closeViewer = () => {
+    if(!viewerOpen) return;
+    viewerOpen = false; viewer.classList.remove("open"); viewerPointers.clear();
+    viewerPhoto.style.transform = ""; zoom = 1; panX = 0; panY = 0;
+    document.body.style.overflow = previousOverflow; setPaused(false);
+  };
+  viewerClose.addEventListener("click",closeViewer);
+  viewer.addEventListener("click",e=>{ if(e.target===viewer) closeViewer(); });
+  document.addEventListener("keydown",e=>{ if(viewerOpen && e.key==="Escape") closeViewer(); });
+  window.addEventListener("pointerdown",e=>{
+    if(!viewerOpen || !viewer.contains(e.target) || e.target===viewerClose) return;
+    e.preventDefault(); viewerPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    try{ viewer.setPointerCapture(e.pointerId); }catch{}
+    const points = viewerPoints();
+    if(points.length===2){ pinchStartDistance = Math.max(1,pointDistance(points[0],points[1])); pinchStartZoom = zoom; }
+  });
+  window.addEventListener("pointermove",e=>{
+    if(!viewerOpen || !viewerPointers.has(e.pointerId)) return;
+    const prev = viewerPointers.get(e.pointerId), current = {x:e.clientX,y:e.clientY};
+    viewerPointers.set(e.pointerId,current); e.preventDefault();
+    const points = viewerPoints();
+    if(points.length===2 && pinchStartDistance){
+      zoom = Math.min(4,Math.max(1,pinchStartZoom*pointDistance(points[0],points[1])/pinchStartDistance));
+      if(zoom===1){ panX = 0; panY = 0; }
+    }else if(zoom>1){ panX += current.x-prev.x; panY += current.y-prev.y; }
+    applyViewerTransform();
+  },{passive:false});
+  const finishViewerPointer = e=>{
+    if(!viewerPointers.has(e.pointerId)) return;
+    viewerPointers.delete(e.pointerId); const points = viewerPoints();
+    if(points.length===2){ pinchStartDistance = Math.max(1,pointDistance(points[0],points[1])); pinchStartZoom = zoom; }
+    else { pinchStartDistance = 0; if(points.length===1){ const p=points[0]; viewerPointers.set([...viewerPointers.keys()][0],{x:p.x,y:p.y}); } }
+  };
+  window.addEventListener("pointerup",finishViewerPointer);
+  window.addEventListener("pointercancel",finishViewerPointer);
+
+  let longPressTimer = 0, longPressFired = false, startY = 0, dy = 0, lastX = 0, lastY = 0;
+  box.addEventListener("pointerdown", e=>{
+    if(e.pointerType==="mouse" && e.button!==0) return;
+    if(!e.target.closest(".slide")) return;
+    dragging = true; longPressFired = false; startX = lastX = e.clientX; startY = lastY = e.clientY; dx = dy = 0; setPaused(true);
+    const pointerId = e.pointerId;
+    clearTimeout(longPressTimer);
+    longPressTimer = setTimeout(()=>{
+      if(!dragging || Math.hypot(dx,dy)>12) return;
+      longPressFired = true; dragging = false; track.classList.remove("drag");
+      track.style.transform = `translateX(${-i*100}%)`;
+      openViewer(slides[i],pointerId,lastX,lastY);
+    },800);
+    box.setPointerCapture(e.pointerId);
+  });
   box.addEventListener("pointermove", e=>{
     if(!dragging) return;
-    dx = e.clientX - startX;
+    lastX = e.clientX; lastY = e.clientY; dx = lastX - startX; dy = lastY - startY;
+    if(Math.hypot(dx,dy)>12) clearTimeout(longPressTimer);
     track.classList.add("drag");
     track.style.transform = `translateX(calc(${-i*100}% + ${dx}px))`;
   });
   const end = ()=>{
+    clearTimeout(longPressTimer);
+    if(longPressFired){ longPressFired = false; return; }
     if(!dragging) return;
     dragging = false;
     const th = Math.min(60, box.clientWidth * .15);
