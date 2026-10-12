@@ -294,14 +294,13 @@ async function driveList(id){
   return (await r.json()).files || [];
 }
 const clean = n => n.replace(/\.[a-z0-9]+$/i,"").replace(/[_-]+/g," ").trim();
+const normalizeFolderName = n => n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N}]+/gu," ").trim().toLocaleUpperCase("pt-BR");
+const SHOWCASE_FOLDERS = new Set(["SELECOES", "RETRO", "VERSAO JOGADOR", "KIT DE TREINO", "CORTA VENTOS"]);
 
 async function loadDriveSlides(){
   const items = [];
   const top = await driveList(DRIVE_FOLDER_ID);
-  for(const f of top){
-    if(f.mimeType.startsWith("image/")) items.push({id:f.id, title:clean(f.name), sub:""});
-  }
-  for(const folder of top.filter(f=>f.mimeType==="application/vnd.google-apps.folder")){
+  for(const folder of top.filter(f=>f.mimeType==="application/vnd.google-apps.folder" && SHOWCASE_FOLDERS.has(normalizeFolderName(f.name)))){
     const files = await driveList(folder.id);
     files.filter(f=>f.mimeType.startsWith("image/")).forEach(f=>items.push({id:f.id, title:clean(f.name), sub:folder.name}));
   }
